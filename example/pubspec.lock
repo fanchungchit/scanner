@@ -115,6 +115,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.8.2"
+  scanner:
+    dependency: "direct main"
+    description:
+      path: ".."
+      relative: true
+    source: path
+    version: "1.0.0"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -178,3 +185,4 @@ packages:
     version: "2.1.4"
 sdks:
   dart: ">=2.19.6 <3.0.0"
+  flutter: ">=1.17.0"
