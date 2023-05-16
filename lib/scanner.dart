@@ -10,16 +10,19 @@ import 'package:collection/collection.dart';
 typedef OnScanned = void Function(String barcode);
 typedef OnDecoded = void Function(String plu, double? price, double? kilograms);
 
+/// Return the PLU from a barcode.
 String _parsePlu(String barcode) {
   return barcode.substring(2, 7);
 }
 
+/// Return the price from a barcode.
 double? _parsePrice(String barcode) {
   final integer = barcode.substring(7, 10);
   final decimal = barcode.substring(10, 12);
   return double.tryParse('$integer.$decimal');
 }
 
+/// Return the kilograms from a barcode.
 double? _parseKilograms(String barcode) {
   final integer = barcode.substring(12, 14);
   final decimal = barcode.substring(14, 17);
@@ -52,6 +55,7 @@ class Scanner extends StatefulWidget {
   /// The child widget.
   final Widget child;
 
+  /// With this constructor, the scanner will return with decoded data.
   factory Scanner.barcode({
     Key? key,
     Duration debounce = const Duration(milliseconds: 100),
@@ -66,12 +70,15 @@ class Scanner extends StatefulWidget {
       focusNode: focusNode,
       autoFocus: autoFocus,
       onScanned: (barcode) {
+        /// Return data from custom barcode
         if (barcode.length == 18 && barcode.startsWith('22')) {
           final plu = _parsePlu(barcode);
           final quantity = _parsePrice(barcode);
           final kilograms = _parseKilograms(barcode);
           return onDecoded(plu, quantity, kilograms);
         }
+
+        /// Return data from EAN-13 barcode
         return onDecoded(barcode, null, null);
       },
       child: child,
@@ -89,6 +96,7 @@ class _ScannerState extends State<Scanner> {
   /// The debounce timer.
   Timer? _debounceTimer;
 
+  /// Return the scanned string.
   String get _scanned {
     final stringBuffer = StringBuffer();
     for (final event in _events) {
@@ -106,6 +114,7 @@ class _ScannerState extends State<Scanner> {
     return stringBuffer.toString();
   }
 
+  /// Debounce the events.
   void _debouncing({required KeyEvent event}) {
     _events.add(event);
     _debounceTimer?.cancel();
@@ -115,6 +124,7 @@ class _ScannerState extends State<Scanner> {
     });
   }
 
+  /// Handle the key events.
   void _onKeyEvent(KeyEvent event) {
     /// If the focus node doesn't have focus, request it.
     if (!widget.focusNode.hasFocus) widget.focusNode.requestFocus();
