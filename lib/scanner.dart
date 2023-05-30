@@ -73,9 +73,9 @@ class Scanner extends StatefulWidget {
         /// Return data from custom barcode
         if (barcode.length == 18 && barcode.startsWith('22')) {
           final plu = _parsePlu(barcode);
-          final quantity = _parsePrice(barcode);
+          final price = _parsePrice(barcode);
           final kilograms = _parseKilograms(barcode);
-          return onDecoded(plu, quantity, kilograms);
+          return onDecoded(plu, price, kilograms);
         }
 
         /// Return data from EAN-13 barcode
