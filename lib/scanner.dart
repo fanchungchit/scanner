@@ -127,7 +127,7 @@ class _ScannerState extends State<Scanner> {
   /// Handle the key events.
   void _onKeyEvent(KeyEvent event) {
     /// If the focus node doesn't have focus, request it.
-    if (!widget.focusNode.hasFocus) widget.focusNode.requestFocus();
+    // if (!widget.focusNode.hasFocus) widget.focusNode.requestFocus();
 
     /// Group events by debounce duration.
     _debouncing(event: event);
