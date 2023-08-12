@@ -1,6 +1,7 @@
 package io.flutter.plugins;
 
 import io.flutter.plugin.common.PluginRegistry;
+import com.plugin.flutter.honeywell_scanner.HoneywellScannerPlugin;
 
 /**
  * Generated file. Do not edit.
@@ -10,6 +11,7 @@ public final class GeneratedPluginRegistrant {
     if (alreadyRegisteredWith(registry)) {
       return;
     }
+    HoneywellScannerPlugin.registerWith(registry.registrarFor("com.plugin.flutter.honeywell_scanner.HoneywellScannerPlugin"));
   }
 
   private static boolean alreadyRegisteredWith(PluginRegistry registry) {

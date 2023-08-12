@@ -67,6 +67,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  honeywell_scanner:
+    dependency: transitive
+    description:
+      name: honeywell_scanner
+      sha256: d389bee4b7afa35f969bbbab14583a59092f15a3c3ce76357923c73b4d9c48b2
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0+14"
   js:
     dependency: transitive
     description:
@@ -121,7 +129,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.0"
+    version: "2.0.0"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -185,4 +193,4 @@ packages:
     version: "2.1.4"
 sdks:
   dart: ">=3.0.0-417 <4.0.0"
-  flutter: ">=1.17.0"
+  flutter: ">=1.22.0"

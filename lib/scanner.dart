@@ -1,11 +1,14 @@
 library scanner;
 
 import 'dart:async' show Timer;
+import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
 
 import 'package:collection/collection.dart';
+import 'package:honeywell_scanner/honeywell_scanner.dart';
 
 typedef OnScanned = void Function(String barcode);
 typedef OnDecoded = void Function(String plu, double? price, double? kilograms);
@@ -90,6 +93,9 @@ class Scanner extends StatefulWidget {
 }
 
 class _ScannerState extends State<Scanner> {
+  bool isHoneywellSupported = false;
+  HoneywellScanner? honeywellScanner;
+
   /// The events that are debounced.
   final _events = <KeyEvent>[];
 
@@ -133,14 +139,34 @@ class _ScannerState extends State<Scanner> {
     _debouncing(event: event);
   }
 
+  init() async {
+    if (kIsWeb) return;
+    isHoneywellSupported = await HoneywellScanner().isSupported();
+    honeywellScanner = HoneywellScanner(onScannerDecodeCallback: (scannedData) {
+      widget.onScanned(scannedData?.code ?? '');
+    }, onScannerErrorCallback: (error) {
+      log('Scanner error: $error');
+    });
+    await honeywellScanner?.startScanner();
+    final properties = {
+      'DEC_CODABAR_START_STOP_TRANSMIT': true,
+      'DEC_EAN13_CHECK_DIGIT_TRANSMIT': true,
+      'DEC_UPCA_CHECK_DIGIT_TRANSMIT': true,
+    };
+    honeywellScanner?.setProperties(properties);
+    if (mounted) setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
+    init();
   }
 
   @override
   void dispose() {
     _debounceTimer?.cancel();
+    honeywellScanner?.stopScanner();
     super.dispose();
   }
 

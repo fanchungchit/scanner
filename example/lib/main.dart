@@ -25,22 +25,42 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
+  bool withDecoder = false;
+
   final focusNode = FocusNode();
   String? scanned;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Scanner(
-          focusNode: focusNode,
-          onScanned: (value) {
+      body: withDecoder
+          ? Scanner.barcode(
+              focusNode: focusNode,
+              onDecoded: (plu, price, kgs) {
+                setState(() {
+                  scanned = '$plu, $price, $kgs';
+                });
+              },
+              child: Center(
+                child: Text('Scanned: $scanned'),
+              ))
+          : Scanner(
+              focusNode: focusNode,
+              onScanned: (value) {
+                setState(() {
+                  scanned = value;
+                });
+              },
+              child: Center(
+                child: Text('Scanned: $scanned'),
+              )),
+      floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
             setState(() {
-              scanned = value;
+              withDecoder = !withDecoder;
             });
           },
-          child: Center(
-            child: Text('Scanned: $scanned'),
-          )),
+          label: Text('Switch to ${withDecoder ? 'Scanner' : 'Barcode'}')),
     );
   }
 }
