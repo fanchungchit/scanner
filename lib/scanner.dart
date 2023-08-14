@@ -10,6 +10,8 @@ import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:collection/collection.dart';
 import 'package:honeywell_scanner/honeywell_scanner.dart';
 
+const _debounce = Duration(milliseconds: 50);
+
 typedef OnScanned = void Function(String barcode);
 typedef OnDecoded = void Function(String plu, double? price, double? kilograms);
 
@@ -36,7 +38,7 @@ double? _parseKilograms(String barcode) {
 class Scanner extends StatefulWidget {
   const Scanner({
     super.key,
-    this.debounce = const Duration(milliseconds: 100),
+    this.debounce = _debounce,
     required this.focusNode,
     this.autoFocus = true,
     required this.onScanned,
@@ -61,7 +63,7 @@ class Scanner extends StatefulWidget {
   /// With this constructor, the scanner will return with decoded data.
   factory Scanner.barcode({
     Key? key,
-    Duration debounce = const Duration(milliseconds: 100),
+    Duration debounce = _debounce,
     required FocusNode focusNode,
     bool autoFocus = true,
     required OnDecoded onDecoded,
@@ -74,7 +76,7 @@ class Scanner extends StatefulWidget {
       autoFocus: autoFocus,
       onScanned: (barcode) {
         /// Return data from custom barcode
-        if (barcode.length == 18 && barcode.startsWith('22')) {
+        if (barcode.length == 18) {
           final plu = _parsePlu(barcode);
           final price = _parsePrice(barcode);
           final kilograms = _parseKilograms(barcode);
