@@ -5,10 +5,15 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show LogicalKeyboardKey;
+import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
 
 import 'package:collection/collection.dart';
 import 'package:honeywell_scanner/honeywell_scanner.dart';
+
+enum ScannerInputType {
+  debounce,
+  enter,
+}
 
 const _debounce = Duration(milliseconds: 50);
 
@@ -38,12 +43,15 @@ double? _parseKilograms(String barcode) {
 class Scanner extends StatefulWidget {
   const Scanner({
     super.key,
+    this.inputType = ScannerInputType.enter,
     this.debounce = _debounce,
     required this.focusNode,
     this.autoFocus = true,
     required this.onScanned,
     required this.child,
   });
+
+  final ScannerInputType inputType;
 
   /// The debounce duration.
   final Duration debounce;
@@ -63,6 +71,7 @@ class Scanner extends StatefulWidget {
   /// With this constructor, the scanner will return with decoded data.
   factory Scanner.barcode({
     Key? key,
+    ScannerInputType inputType = ScannerInputType.enter,
     Duration debounce = _debounce,
     required FocusNode focusNode,
     bool autoFocus = true,
@@ -71,6 +80,7 @@ class Scanner extends StatefulWidget {
   }) {
     return Scanner(
       key: key,
+      inputType: inputType,
       debounce: debounce,
       focusNode: focusNode,
       autoFocus: autoFocus,
@@ -137,8 +147,24 @@ class _ScannerState extends State<Scanner> {
     /// If the focus node doesn't have focus, request it.
     // if (!widget.focusNode.hasFocus) widget.focusNode.requestFocus();
 
-    /// Group events by debounce duration.
-    _debouncing(event: event);
+    switch (widget.inputType) {
+      case ScannerInputType.debounce:
+
+        /// Group events by debounce duration.
+        _debouncing(event: event);
+        break;
+
+      case ScannerInputType.enter:
+        if (event is! KeyDownEvent) return;
+        _events.add(event);
+
+        /// If the event is a enter event, return.
+        if (event.logicalKey == LogicalKeyboardKey.enter) {
+          widget.onScanned(_scanned);
+          _events.clear();
+        }
+        break;
+    }
   }
 
   init() async {
