@@ -10,11 +10,13 @@ import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
 import 'package:collection/collection.dart';
 import 'package:honeywell_scanner/honeywell_scanner.dart';
 
+/// Define the input type.
 enum ScannerInputType {
   debounce,
   enter,
 }
 
+/// The default debounce duration.
 const _debounce = Duration(milliseconds: 50);
 
 typedef OnScanned = void Function(String barcode);
@@ -51,6 +53,7 @@ class Scanner extends StatefulWidget {
     required this.child,
   });
 
+  /// The input type.
   final ScannerInputType inputType;
 
   /// The debounce duration.
@@ -105,6 +108,7 @@ class Scanner extends StatefulWidget {
 }
 
 class _ScannerState extends State<Scanner> {
+  /// Whether the scanner is supported.
   bool isHoneywellSupported = false;
   HoneywellScanner? honeywellScanner;
 
