@@ -1,11 +1,10 @@
 library scanner;
 
 import 'dart:async' show Timer;
-import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
+import 'package:flutter/services.dart' show KeyUpEvent, LogicalKeyboardKey;
 
 import 'package:collection/collection.dart';
 import 'package:honeywell_scanner/honeywell_scanner.dart';
@@ -159,14 +158,16 @@ class _ScannerState extends State<Scanner> {
         break;
 
       case ScannerInputType.enter:
-        if (event is! KeyDownEvent) return;
-        _events.add(event);
+        if (event is KeyUpEvent) return;
 
         /// If the event is a enter event, return.
-        if (event.logicalKey == LogicalKeyboardKey.enter) {
+        if (event.character == '\n') {
           widget.onScanned(_scanned);
           _events.clear();
+          return;
         }
+
+        _events.add(event);
         break;
     }
   }
@@ -177,7 +178,7 @@ class _ScannerState extends State<Scanner> {
     honeywellScanner = HoneywellScanner(onScannerDecodeCallback: (scannedData) {
       widget.onScanned(scannedData?.code ?? '');
     }, onScannerErrorCallback: (error) {
-      log('Scanner error: $error');
+      debugPrint('Scanner error: $error');
     });
     await honeywellScanner?.startScanner();
     final properties = {
@@ -204,6 +205,9 @@ class _ScannerState extends State<Scanner> {
 
   @override
   Widget build(BuildContext context) {
+    if (isHoneywellSupported) {
+      return widget.child;
+    }
     return KeyboardListener(
       focusNode: widget.focusNode,
       autofocus: widget.autoFocus,
