@@ -161,7 +161,7 @@ class _ScannerState extends State<Scanner> {
         if (event is KeyUpEvent) return;
 
         /// If the event is a enter event, return.
-        if (event.character == '\n') {
+        if (event.character == '\n' || event.logicalKey.keyLabel == 'Enter') {
           widget.onScanned(_scanned);
           _events.clear();
           return;
