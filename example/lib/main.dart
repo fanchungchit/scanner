@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:scanner/scanner.dart';
 
@@ -28,39 +29,56 @@ class _MainViewState extends State<MainView> {
   bool withDecoder = false;
 
   final focusNode = FocusNode();
+  var isFocused = false;
+  RawKeyEvent? rawkeyEvent;
+  KeyEvent? keyEvent;
   String? scanned;
+  List<RawKeyEvent> rawkeyEvents = [];
+  List<KeyEvent> events = [];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: withDecoder
-          ? Scanner.barcode(
-              focusNode: focusNode,
-              onDecoded: (plu, price, kgs) {
-                setState(() {
-                  scanned = '$plu, $price, $kgs';
-                });
-              },
-              child: Center(
-                child: Text('Scanned: $scanned'),
-              ))
-          : Scanner(
-              focusNode: focusNode,
-              onScanned: (value) {
-                setState(() {
-                  scanned = value;
-                });
-              },
-              child: Center(
-                child: Text('Scanned: $scanned'),
-              )),
-      floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
+    return PopScope(
+      canPop: false,
+      child: BarcodeScanner(
+          onFocusChange: (isFocused) =>
+              setState(() => this.isFocused = isFocused),
+          focusNode: focusNode,
+          onKey: (node, event) {
+            if (event is RawKeyUpEvent) {}
+          },
+          onBarcode: (barcode) {
             setState(() {
-              withDecoder = !withDecoder;
+              scanned = barcode;
             });
           },
-          label: Text('Switch to ${withDecoder ? 'Scanner' : 'Barcode'}')),
+          onEvents: (events) => setState(() {
+                rawkeyEvents = events;
+              }),
+          child: GestureDetector(
+            onTap: () => focusNode.requestFocus(),
+            behavior: HitTestBehavior.opaque,
+            child: Scaffold(
+              appBar: AppBar(
+                title: const TextField(),
+              ),
+              body: ListView(
+                children: [
+                  Text('Focused: $isFocused'),
+                  Text('Scanned: $scanned'),
+                  Text('Key: ${rawkeyEvent?.toString() ?? ''}'),
+                  Text('KeyEvent:\n${keyEvent?.toString() ?? ''}'),
+                  TextButton(
+                      onPressed: () => setState(() {
+                            rawkeyEvents.clear();
+                          }),
+                      child: const Text('Clear')),
+                  Text(
+                      'Events: ${rawkeyEvents.map((e) => e.toString()).join('\n')}'),
+                ],
+              ),
+            ),
+          )),
     );
   }
 }

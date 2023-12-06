@@ -9,6 +9,8 @@ import 'package:flutter/services.dart' show KeyUpEvent, LogicalKeyboardKey;
 import 'package:collection/collection.dart';
 import 'package:honeywell_scanner/honeywell_scanner.dart';
 
+export 'barcode_scanner.dart';
+
 /// Define the input type.
 enum ScannerInputType {
   debounce,
@@ -47,6 +49,7 @@ class Scanner extends StatefulWidget {
     this.inputType = ScannerInputType.enter,
     this.debounce = _debounce,
     required this.focusNode,
+    this.onFocusChange,
     this.autoFocus = true,
     required this.onScanned,
     required this.child,
@@ -60,6 +63,9 @@ class Scanner extends StatefulWidget {
 
   /// The focus node.
   final FocusNode focusNode;
+
+  /// The callback that is called when the focus changes.
+  final void Function(bool)? onFocusChange;
 
   /// Whether to autofocus the focus node.
   final bool autoFocus;
@@ -76,6 +82,7 @@ class Scanner extends StatefulWidget {
     ScannerInputType inputType = ScannerInputType.enter,
     Duration debounce = _debounce,
     required FocusNode focusNode,
+    void Function(bool)? onFocusChange,
     bool autoFocus = true,
     required OnDecoded onDecoded,
     required Widget child,
@@ -85,6 +92,7 @@ class Scanner extends StatefulWidget {
       inputType: inputType,
       debounce: debounce,
       focusNode: focusNode,
+      onFocusChange: onFocusChange,
       autoFocus: autoFocus,
       onScanned: (barcode) {
         /// Return data from custom barcode
@@ -146,7 +154,7 @@ class _ScannerState extends State<Scanner> {
   }
 
   /// Handle the key events.
-  void _onKeyEvent(KeyEvent event) {
+  KeyEventResult _onKeyEvent(FocusNode focusNode, KeyEvent event) {
     /// If the focus node doesn't have focus, request it.
     // if (!widget.focusNode.hasFocus) widget.focusNode.requestFocus();
 
@@ -158,18 +166,19 @@ class _ScannerState extends State<Scanner> {
         break;
 
       case ScannerInputType.enter:
-        if (event is KeyUpEvent) return;
+        if (event is KeyUpEvent) return KeyEventResult.handled;
 
         /// If the event is a enter event, return.
         if (event.character == '\n' || event.logicalKey.keyLabel == 'Enter') {
           widget.onScanned(_scanned);
           _events.clear();
-          return;
+          return KeyEventResult.handled;
         }
 
         _events.add(event);
         break;
     }
+    return KeyEventResult.handled;
   }
 
   init() async {
@@ -208,7 +217,8 @@ class _ScannerState extends State<Scanner> {
     if (isHoneywellSupported) {
       return widget.child;
     }
-    return KeyboardListener(
+    return Focus(
+      onFocusChange: widget.onFocusChange,
       focusNode: widget.focusNode,
       autofocus: widget.autoFocus,
       onKeyEvent: _onKeyEvent,
