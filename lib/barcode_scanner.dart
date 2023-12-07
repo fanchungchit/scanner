@@ -64,7 +64,7 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
           }
         }
         widget.onEvents?.call(events);
-        return KeyEventResult.handled;
+        return KeyEventResult.ignored;
       },
       onKeyEvent: widget.onKeyEvent,
       child: widget.child,
