@@ -33,18 +33,29 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
   String get barcode {
     final buffer = StringBuffer();
     for (final event in events) {
-      final character = event.logicalKey.keyLabel;
+      if (event.character == null) continue;
+      if (event.isShiftPressed) continue;
       final index = events.indexOf(event);
       if (index != 0) {
-        final previousEvent = events.elementAtOrNull(index - 1);
-        if (previousEvent?.logicalKey == LogicalKeyboardKey.shiftLeft) {
-          buffer.write(character.toUpperCase());
+        final previous = events[index - 1];
+        if (previous.isShiftPressed) {
+          buffer.write(event.character!.toUpperCase());
           continue;
         }
       }
-      buffer.write(character);
+      buffer.write(event.character);
     }
     return buffer.toString();
+  }
+
+  addEvent(RawKeyEvent event) {
+    if (event is RawKeyUpEvent) return;
+    if (event.logicalKey == LogicalKeyboardKey.enter) {
+      widget.onBarcode?.call(barcode);
+      events.clear();
+    } else {
+      events.add(event);
+    }
   }
 
   @override
@@ -55,15 +66,8 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
       onFocusChange: widget.onFocusChange,
       onKey: (node, event) {
         widget.onKey?.call(node, event);
-        if (event is RawKeyUpEvent) {
-          if (event.logicalKey == LogicalKeyboardKey.enter) {
-            widget.onBarcode?.call(barcode);
-            events.clear();
-          } else {
-            events.add(event);
-          }
-        }
         widget.onEvents?.call(events);
+        addEvent(event);
         return KeyEventResult.ignored;
       },
       onKeyEvent: widget.onKeyEvent,

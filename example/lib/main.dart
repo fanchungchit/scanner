@@ -26,59 +26,19 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
-  bool withDecoder = false;
-
-  final focusNode = FocusNode();
-  var isFocused = false;
-  RawKeyEvent? rawkeyEvent;
-  KeyEvent? keyEvent;
-  String? scanned;
-  List<RawKeyEvent> rawkeyEvents = [];
-  List<KeyEvent> events = [];
+  String? data;
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      child: BarcodeScanner(
-          onFocusChange: (isFocused) =>
-              setState(() => this.isFocused = isFocused),
-          focusNode: focusNode,
-          onKey: (node, event) {
-            if (event is RawKeyUpEvent) {}
-          },
-          onBarcode: (barcode) {
-            setState(() {
-              scanned = barcode;
-            });
-          },
-          onEvents: (events) => setState(() {
-                rawkeyEvents = events;
-              }),
-          child: GestureDetector(
-            onTap: () => focusNode.requestFocus(),
-            behavior: HitTestBehavior.opaque,
-            child: Scaffold(
-              appBar: AppBar(
-                title: const TextField(),
-              ),
-              body: ListView(
-                children: [
-                  Text('Focused: $isFocused'),
-                  Text('Scanned: $scanned'),
-                  Text('Key: ${rawkeyEvent?.toString() ?? ''}'),
-                  Text('KeyEvent:\n${keyEvent?.toString() ?? ''}'),
-                  TextButton(
-                      onPressed: () => setState(() {
-                            rawkeyEvents.clear();
-                          }),
-                      child: const Text('Clear')),
-                  Text(
-                      'Events: ${rawkeyEvents.map((e) => e.toString()).join('\n')}'),
-                ],
-              ),
-            ),
-          )),
-    );
+    return BarcodeScanner(
+        onBarcode: (barcode) => setState(() => data = barcode),
+        onKey: (focus, event) {
+          if (event is RawKeyUpEvent) return;
+          if (event.isShiftPressed) print('Shift pressed');
+          print(event.character);
+        },
+        child: Scaffold(
+          body: Center(child: Text(data ?? 'Start scanning...')),
+        ));
   }
 }

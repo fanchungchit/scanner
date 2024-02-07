@@ -1,6 +1,6 @@
 name: scanner
 description: A new Flutter package project.
-version: 4.0.1
+version: 5.0.0
 homepage: https://github.com/fanchungchit/scanner
 
 environment:
@@ -8,14 +8,15 @@ environment:
   flutter: ">=3.0.0"
 
 dependencies:
-  collection: ^1.17.0
   flutter:
     sdk: flutter
-  honeywell_scanner: ^5.0.0+2
+
+  collection:
+  honeywell_scanner:
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints:
 
 flutter:
