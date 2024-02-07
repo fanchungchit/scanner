@@ -34,8 +34,8 @@ class _MainViewState extends State<MainView> {
         onBarcode: (barcode) => setState(() => data = barcode),
         onKey: (focus, event) {
           if (event is RawKeyUpEvent) return;
-          if (event.isShiftPressed) print('Shift pressed');
-          print(event.character);
+          if (event.isShiftPressed) debugPrint('Shift pressed');
+          debugPrint(event.character);
         },
         child: Scaffold(
           body: Center(child: Text(data ?? 'Start scanning...')),
