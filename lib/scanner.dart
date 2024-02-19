@@ -10,6 +10,7 @@ import 'package:collection/collection.dart';
 import 'package:honeywell_scanner/honeywell_scanner.dart';
 
 export 'barcode_scanner.dart';
+export 'barcode_scanner_debug_view.dart';
 
 /// Define the input type.
 enum ScannerInputType {
