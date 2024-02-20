@@ -1,26 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class BarcodeScanner extends StatefulWidget {
-  const BarcodeScanner({
-    super.key,
-    this.autoFocus = true,
-    this.focusNode,
-    this.onFocusChange,
-    this.onKey,
-    this.onKeyEvent,
-    this.onBarcode,
-    this.onEvents,
-    required this.child,
-  });
+typedef OnBarcodeScan = void Function(String barcode);
 
-  final bool autoFocus;
-  final FocusNode? focusNode;
-  final void Function(bool)? onFocusChange;
-  final void Function(FocusNode, RawKeyEvent)? onKey;
-  final KeyEventResult Function(FocusNode, KeyEvent)? onKeyEvent;
-  final void Function(String barcode)? onBarcode;
-  final void Function(List<RawKeyEvent> events)? onEvents;
+class BarcodeScanner extends StatefulWidget {
+  const BarcodeScanner(
+      {super.key, required this.onBarcodeScan, required this.child});
+
+  final OnBarcodeScan onBarcodeScan;
   final Widget child;
 
   @override
@@ -28,50 +15,45 @@ class BarcodeScanner extends StatefulWidget {
 }
 
 class _BarcodeScannerState extends State<BarcodeScanner> {
-  final events = <RawKeyEvent>[];
+  final _hk = HardwareKeyboard.instance;
+  final _characters = <String>[];
 
-  String get barcode {
-    final buffer = StringBuffer();
-    for (final event in events) {
-      if (event.character == null) continue;
-      if (event.isShiftPressed) continue;
-      final index = events.indexOf(event);
-      if (index != 0) {
-        final previous = events[index - 1];
-        if (previous.isShiftPressed) {
-          buffer.write(event.character!.toUpperCase());
-          continue;
-        }
-      }
-      buffer.write(event.character);
-    }
-    return buffer.toString();
+  @override
+  void initState() {
+    _hk.addHandler(_handler);
+    super.initState();
   }
 
-  addEvent(RawKeyEvent event) {
-    if (event is RawKeyUpEvent) return;
-    if (event.logicalKey == LogicalKeyboardKey.enter) {
-      widget.onBarcode?.call(barcode);
-      events.clear();
-    } else {
-      events.add(event);
+  @override
+  void dispose() {
+    _hk.removeHandler(_handler);
+    super.dispose();
+  }
+
+  bool _handler(KeyEvent event) {
+    if (_hk.isLogicalKeyPressed(LogicalKeyboardKey.enter)) {
+      _fire();
     }
+
+    final character = event.character;
+    if (character == null) return false;
+
+    _add(character);
+    return false;
+  }
+
+  _fire() {
+    final value = _characters.join();
+    _characters.clear();
+    widget.onBarcodeScan(value);
+  }
+
+  _add(String character) {
+    _characters.add(character);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      autofocus: widget.autoFocus,
-      focusNode: widget.focusNode,
-      onFocusChange: widget.onFocusChange,
-      onKey: (node, event) {
-        widget.onKey?.call(node, event);
-        widget.onEvents?.call(events);
-        addEvent(event);
-        return KeyEventResult.ignored;
-      },
-      onKeyEvent: widget.onKeyEvent,
-      child: widget.child,
-    );
+    return widget.child;
   }
 }
