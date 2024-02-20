@@ -45,7 +45,7 @@ class _BarcodeScannerDebugViewState extends State<BarcodeScannerDebugView> {
                 itemBuilder: (context, index) {
                   final barcode = barcodes[index];
                   return ListTile(
-                    title: Text(barcode.$1),
+                    title: Text('[${barcode.$1.length}] ${barcode.$1}'),
                     subtitle: Text(barcode.$2.toString()),
                   );
                 },
