@@ -33,6 +33,7 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
   bool _handler(KeyEvent event) {
     if (_hk.isLogicalKeyPressed(LogicalKeyboardKey.enter)) {
       _fire();
+      return false;
     }
 
     final character = event.character;
